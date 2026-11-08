@@ -22,6 +22,8 @@ async fn main() {
         .and_then(|s| s.parse().ok())
         .unwrap_or(30);
 
+    let run_once = env::args().any(|a| a == "--once");
+
     let docker_socket = env::var("DOCKER_SOCKET")
         .unwrap_or_else(|_| "/var/run/docker.sock".to_string());
 
@@ -68,6 +70,10 @@ async fn main() {
         }
         if host_m.disk_percent > 92.0 {
             warn!("⚠️ HIGH DISK: {:.1}% on {} ({})", host_m.disk_percent, node_name, host_m.disk_worst_path);
+        }
+
+        if run_once {
+            return;
         }
 
         sleep(Duration::from_secs(interval_secs)).await;
